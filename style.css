@@ -1,0 +1,126 @@
+* {
+  box-sizing: border-box;
+  touch-action: none;
+  font-family: system-ui, -apple-system;
+}
+
+body {
+  margin: 0;
+  padding: 10px;
+  background: #f5f5f5;
+}
+
+/* Controls */
+#controls {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+#lengthInput {
+  flex: 1;
+  font-size: 18px;
+}
+
+/* Words container */
+#words {
+  display: flex;
+  flex-wrap: wrap;  /* allows words to wrap on narrow screens */
+  align-items: center;
+  row-gap: 10px;
+  justify-content: flex-start;
+}
+
+.word {
+  display: flex;
+  gap: 6px;
+  white-space: nowrap; /* prevent breaking letters inside words */
+}
+
+.word-space {
+  width: 22px;
+  flex-shrink: 0;
+}
+
+/* Squares */
+.square {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #555;
+  background: white;
+  transition: background 0.15s;
+}
+
+.square:hover {
+  background: #eef;
+}
+
+/* Canvas */
+#canvas {
+  min-height: 120px;
+  max-height: 50vh;   /* limits height to half the screen */
+  background: #ddd;
+  padding: 8px;
+  position: relative;
+  overflow-y: auto;   /* allows scrolling if letters exceed canvas */
+}
+
+/* Letters */
+.letter {
+  width: 44px;
+  height: 44px;
+  background: #fff;
+  border: 2px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+}
+
+.letter.locked {
+  background: #bbb;
+  border-color: #888;
+}
+
+/* Hint text */
+.hint {
+  color: #666;
+}
+
+/* ---------------------- Responsive tweaks for small portrait screens ---------------------- */
+@media (max-width: 375px) { /* iPhone SE and similar */
+  .letter, .square {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  #canvas {
+    min-height: 100px;
+    padding: 6px;
+  }
+
+  .word-space {
+    width: 16px;
+  }
+}
+
+@media (max-width: 320px) { /* very small screens */
+  .letter, .square {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  #canvas {
+    min-height: 90px;
+    padding: 4px;
+  }
+
+  .word-space {
+    width: 12px;
+  }
+}
