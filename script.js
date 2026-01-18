@@ -102,6 +102,8 @@ function enableDrag(id) {
 const l = letters[id];
 const el = l.el;
 let startX, startY, origX, origY;
+let moved = false;
+let longPressTimer;
 
 el.addEventListener("pointerdown", e => {
 if (l.locked) return;
@@ -110,6 +112,15 @@ startX = e.clientX;
 startY = e.clientY;
 origX = l.left;
 origY = l.top;
+moved = false;
+
+// Long press to delete (mobile)
+longPressTimer = setTimeout(() => {
+canvas.removeChild(el);
+if (l.squareId !== null) squares[l.squareId].letterId = null;
+delete letters[id];
+}, 500);
+
 if (l.squareId !== null) {
 squares[l.squareId].letterId = null;
 l.squareId = null;
@@ -118,40 +129,37 @@ l.squareId = null;
 
 el.addEventListener("pointermove", e => {
 if (!el.hasPointerCapture(e.pointerId)) return;
+moved = true;
+clearTimeout(longPressTimer);
+
 l.left = origX + (e.clientX - startX);
 l.top = origY + (e.clientY - startY);
 el.style.left = l.left + "px";
 el.style.top = l.top + "px";
 });
 
-el.addEventListener("pointerup", () => {
+el.addEventListener("pointerup", e => {
+clearTimeout(longPressTimer);
+
+// Snap if moved
+if (moved) {
 cacheSquareRects();
 const snap = findSnapSquare(l);
 if (snap !== null) placeInSquare(l, snap);
-el.style.left = l.left + "px";
-el.style.top = l.top + "px";
-});
-
-// Tap to lock/unlock
-el.addEventListener("click", e => {
-e.stopPropagation();
+} else {
+// Tap detected: toggle lock
 if (l.squareId !== null) {
 l.locked = !l.locked;
 el.classList.toggle("locked", l.locked);
 }
-});
+}
 
-// Double-tap delete
-el.addEventListener("dblclick", () => {
-el.style.transition = "opacity 0.2s";
-el.style.opacity = "0";
-setTimeout(() => {
-if (el.parentElement) canvas.removeChild(el);
-if (l.squareId !== null) squares[l.squareId].letterId = null;
-delete letters[id];
-}, 200);
+el.style.left = l.left + "px";
+el.style.top = l.top + "px";
 });
 }
+
+	
 
 /* ---------- SNAP LOGIC ---------- */
 function findSnapSquare(letter) {
