@@ -1,4 +1,17 @@
 
+Conversation opened. 1 unread message.
+
+Skip to content
+Using Gmail with screen readers
+1 of 1
+New script
+Inbox
+Trevor Lukey <tlukey@gmail.com>
+	
+6:26 PM (8 minutes ago)
+	
+	
+to me
 window.addEventListener("DOMContentLoaded", () => {
 const canvas = document.getElementById("canvas");
 const wordsContainer = document.getElementById("words");
@@ -49,8 +62,9 @@ squareId++;
 wordsContainer.appendChild(word);
 });
 
-requestAnimationFrame(() =>{
-	cacheSquareRects();
+// Allow layout to settle before measuring
+requestAnimationFrame(() => {
+cacheSquareRects();
 });
 
 letterInput.focus();
@@ -127,7 +141,6 @@ squares[squareId].letterId = letter.id;
 }
 
 /* ---------- DRAG / TAP / DELETE ---------- */
-f
 function enableDrag(id) {
 const l = letters[id];
 const el = l.el;
@@ -194,11 +207,6 @@ l.locked = !l.locked;
 el.classList.toggle("locked", l.locked);
 });
 }
- 
-
-	
-
-/* end enableDrag*/
 
 /* ---------- UI EVENTS ---------- */
 buildBtn.addEventListener("click", () => {
@@ -240,5 +248,7 @@ letterId = 0;
 letterInput.focus();
 });
 });
+ 
 
+Trevor
 	
