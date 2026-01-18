@@ -163,12 +163,26 @@ function placeInSquare(letter, squareId) {
 /* ---------- DEMO SETUP ---------- */
 
 /* Example: 2 words, lengths 5 and 4 */
-buildWords([5, 4]);
+//buildWords([5, 4]);
 
 /* Keyboard input */
 document.addEventListener("keydown", e => {
   if (/^[a-zA-Z]$/.test(e.key)) {
     addLetter(e.key.toUpperCase());
   }
+  
+document.getElementById("buildBtn").addEventListener("click", () => {
+const input = document.getElementById("wordInput").value.trim();
+if (!input) return;
+
+const lengths = input
+.split(/\s+/)
+.map(n => parseInt(n, 10))
+.filter(n => n > 0 && n < 20);
+
+if (!lengths.length) return;
+
+buildWords(lengths);
 });
+
 
