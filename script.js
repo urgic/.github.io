@@ -98,39 +98,43 @@ height: r.height
 }
 
 /* ---------- DRAG, TAP, DOUBLE-TAP ---------- */
+
 function enableDrag(id) {
 const l = letters[id];
 const el = l.el;
 let startX, startY, origX, origY;
 let moved = false;
 let longPressTimer;
+let wasInSquare = false;
 
 el.addEventListener("pointerdown", e => {
-if (l.locked) return;
+if (l.locked) return; // prevent drag if locked
 el.setPointerCapture(e.pointerId);
 startX = e.clientX;
 startY = e.clientY;
 origX = l.left;
 origY = l.top;
 moved = false;
+wasInSquare = l.squareId !== null;
 
 // Long press to delete (mobile)
 longPressTimer = setTimeout(() => {
-canvas.removeChild(el);
+if (el.parentElement) canvas.removeChild(el);
 if (l.squareId !== null) squares[l.squareId].letterId = null;
 delete letters[id];
 }, 500);
-
-if (l.squareId !== null) {
-squares[l.squareId].letterId = null;
-l.squareId = null;
-}
 });
 
 el.addEventListener("pointermove", e => {
 if (!el.hasPointerCapture(e.pointerId)) return;
 moved = true;
 clearTimeout(longPressTimer);
+
+// Only clear square if drag happens
+if (l.squareId !== null) {
+squares[l.squareId].letterId = null;
+l.squareId = null;
+}
 
 l.left = origX + (e.clientX - startX);
 l.top = origY + (e.clientY - startY);
@@ -141,14 +145,14 @@ el.style.top = l.top + "px";
 el.addEventListener("pointerup", e => {
 clearTimeout(longPressTimer);
 
-// Snap if moved
 if (moved) {
+// Snap if dragged
 cacheSquareRects();
 const snap = findSnapSquare(l);
 if (snap !== null) placeInSquare(l, snap);
 } else {
-// Tap detected: toggle lock
-if (l.squareId !== null) {
+// Tap detected: toggle lock if letter was originally in a square
+if (wasInSquare) {
 l.locked = !l.locked;
 el.classList.toggle("locked", l.locked);
 }
@@ -159,6 +163,7 @@ el.style.top = l.top + "px";
 });
 }
 
+/* enad enabledrag*/
 	
 
 /* ---------- SNAP LOGIC ---------- */
@@ -223,3 +228,4 @@ letterInput.focus();
 });
 
 	
+
