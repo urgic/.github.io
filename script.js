@@ -163,7 +163,7 @@ function placeInSquare(letter, squareId) {
 /* ---------- DEMO SETUP ---------- */
 
 /* Example: 2 words, lengths 5 and 4 */
-//buildWords([5, 4]);
+/* buildWords([5, 4]); */
 
 /* Keyboard input */
 document.addEventListener("keydown", e => {
@@ -184,5 +184,6 @@ if (!lengths.length) return;
 
 buildWords(lengths);
 });
+
 
 
