@@ -1,85 +1,89 @@
+
 * {
-	box-sizing: border-box;
-}
-
-.letter {
-	touch-action: none;
-}
-
-#canvas {
-	touch-action: pan-y;
+box-sizing: border-box;
 }
 
 body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f0f0f0;
+margin: 0;
+font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+background: #f0f0f0;
 }
 
-#controls {
-  padding: 10px;
-  background: #fff;
-  border-bottom: 1px solid #ccc;
+/* Controls */
+#controls, #letterControls {
+padding: 10px;
+background: #fff;
+border-bottom: 1px solid #ccc;
+display: flex;
+gap: 8px;
 }
 
+#controls input, #letterControls input {
+flex: 1;
+font-size: 16px;
+padding: 6px;
+}
+
+#controls button, #letterControls button {
+font-size: 16px;
+padding: 6px 12px;
+}
+
+/* Canvas */
 #canvas {
-  position: relative;
-  min-height: 350px;
-  padding: 10px;
-  background: #ddd;
-  overflow-y: auto;
+position: relative;
+padding: 10px;
+background: #ddd;
+min-height: 300px;
 }
 
-/* Word rows */
+/* Words */
 .word {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
+display: flex;
+gap: 6px;
+margin-bottom: 10px;
 }
 
-/* Letter squares */
+/* Target squares */
 .square {
-  width: 44px;
-  height: 44px;
-  border: 2px solid #666;
-  background: #fff;
-  border-radius: 4px;
+width: 44px;
+height: 44px;
+border: 2px solid #666;
+background: #fff;
+border-radius: 4px;
 }
 
-/* Draggable letters */
+/* Letters */
 .letter {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  background: #fff;
-  border: 2px solid #333;
-  border-radius: 6px;
-  font-size: 22px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  user-select: none;
-  z-index: 10;
+position: absolute;
+width: 44px;
+height: 44px;
+background: #fff;
+border: 2px solid #333;
+border-radius: 6px;
+font-size: 22px;
+font-weight: bold;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: grab;
+user-select: none;
+touch-action: none;
+z-index: 10;
 }
 
 /* Locked letter */
 .letter.locked {
-  background: #cde5ff;
-  border-color: #2a6dd8;
-  cursor: default;
+background: #cde5ff;
+border-color: #2a6dd8;
+cursor: default;
 }
 
-/* Hint text */
+/* Hint */
 .hint {
-  display: block;
-  margin-top: 12px;
-  color: #444;
-  font-size: 14px;
+display: block;
+margin-top: 12px;
+color: #444;
+font-size: 14px;
 }
-
-
-
-
-
+ 
