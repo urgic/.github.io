@@ -57,13 +57,12 @@ body {
 
 /* Canvas */
 #canvas {
-  min-height: 120px;
-  max-height: 50vh;   /* limits height to half the screen */
-  background: #ddd;
-  padding: 8px;
-  position: relative;
-  overflow-y: auto;   /* allows scrolling if letters exceed canvas */
-}
+    min-height: 300px;
+	background: #ddd;
+	padding: 8px;
+	position: relative;
+	overflow-y: auto;
+  }
 
 /* Letters */
 .letter {
@@ -124,3 +123,4 @@ body {
     width: 12px;
   }
 }
+
