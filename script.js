@@ -73,9 +73,10 @@ function cacheSquareRects() {
 
   for (const id in squares) {
     const r = squares[id].el.getBoundingClientRect();
+
     squares[id].rect = {
-      left: r.left - canvasRect.left,
-      top: r.top - canvasRect.top,
+      left: r.left - canvasRect.left + canvas.scrollLeft,
+      top:  r.top  - canvasRect.top  + canvas.scrollTop,
       width: r.width,
       height: r.height
     };
@@ -151,16 +152,14 @@ function findSnapSquare(letter) {
 }
 
 function placeInSquare(letter, squareId) {
-  const sq = squares[squareId];
-  const r = sq.rect;
+  const r = squares[squareId].rect;
 
   letter.x = r.left + r.width / 2 - 22;
-  letter.y = r.top + r.height / 2 - 22;
+  letter.y = r.top  + r.height / 2 - 22;
 
   letter.squareId = squareId;
-  sq.letterId = letter.id;
+  squares[squareId].letterId = letter.id;
 }
-
 /* ---------- DEMO SETUP ---------- */
 
 /* Example: 2 words, lengths 5 and 4 */
@@ -172,3 +171,4 @@ document.addEventListener("keydown", e => {
     addLetter(e.key.toUpperCase());
   }
 });
+
