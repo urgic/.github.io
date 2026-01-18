@@ -1,5 +1,4 @@
 
-// Ensure DOM elements exist before running
 window.addEventListener("DOMContentLoaded", () => {
 const canvas = document.getElementById("canvas");
 const wordsContainer = document.getElementById("words");
@@ -7,20 +6,36 @@ const wordInput = document.getElementById("wordInput");
 const buildBtn = document.getElementById("buildBtn");
 const letterInput = document.getElementById("letterInput");
 const addLetterBtn = document.getElementById("addLetterBtn");
+const resetLettersBtn = document.getElementById("resetLettersBtn");
 
-let letters = {};
-let squares = {};
-let letterId = 0;
-let squareId = 0;
+resetLettersBtn.addEventListener("click", () => {
+// Remove all letters from canvas
+for (const id in letters) {
+const l = letters[id];
+if (l.el.parentElement) canvas.removeChild(l.el);
+}
 
-/* ---------- BUILD WORD BOXES ---------- */
+// Clear letters object
+   letters = {};
+   letterId = 0;
+
+
+   let letters = {};
+   let squares = {};
+   let letterId = 0;
+   let squareId = 0;
+// Refocus input
+   letterInput.focus();
+}];
+   
+/* ---------- BUILD BOXES ---------- */
 function buildWords(lengths) {
-// Clear previous boxes
+// Clear previous squares
 wordsContainer.innerHTML = "";
 squares = {};
 squareId = 0;
 
-// Clear letters
+// Clear previous letters
 for (const id in letters) {
 const l = letters[id];
 if (l.el.parentElement) canvas.removeChild(l.el);
@@ -51,12 +66,10 @@ wordsContainer.appendChild(word);
 });
 
 cacheSquareRects();
-
-// Auto-focus letter input
 letterInput.focus();
 }
 
-/* ---------- LETTER CREATION ---------- */
+/* ---------- ADD LETTER ---------- */
 function addLetter(char) {
 const id = letterId++;
 const div = document.createElement("div");
@@ -64,7 +77,7 @@ div.className = "letter";
 div.textContent = char;
 div.dataset.id = id;
 
-// Offset letters to avoid overlap
+// Offset letters so they don't stack
 const offset = (id % 10) * 20;
 const baseX = 20 + offset;
 const baseY = 150 + offset;
@@ -72,26 +85,23 @@ const baseY = 150 + offset;
 letters[id] = {
 id,
 el: div,
-x: baseX,
-y: baseY,
+left: baseX,
+top: baseY,
 squareId: null,
 locked: false
 };
 
+// Position letters using left/top
+div.style.left = letters[id].left + "px";
+div.style.top = letters[id].top + "px";
+
 canvas.appendChild(div);
-updateLetter(id);
 enableDrag(id);
 }
 
-/* ---------- POSITIONING ---------- */
-function updateLetter(id) {
-const l = letters[id];
-l.el.style.transform = `translate(${l.x}px, ${l.y}px)`;
-}
-
+/* ---------- CACHE SQUARE POSITIONS ---------- */
 function cacheSquareRects() {
 const canvasRect = canvas.getBoundingClientRect();
-
 for (const id in squares) {
 const r = squares[id].el.getBoundingClientRect();
 squares[id].rect = {
@@ -103,11 +113,10 @@ height: r.height
 }
 }
 
-/* ---------- DRAG, TAP, AND DELETE ---------- */
+/* ---------- DRAG, TAP, DOUBLE-TAP ---------- */
 function enableDrag(id) {
 const l = letters[id];
 const el = l.el;
-
 let startX, startY, origX, origY;
 
 el.addEventListener("pointerdown", e => {
@@ -115,9 +124,8 @@ if (l.locked) return;
 el.setPointerCapture(e.pointerId);
 startX = e.clientX;
 startY = e.clientY;
-origX = l.x;
-origY = l.y;
-
+origX = l.left;
+origY = l.top;
 if (l.squareId !== null) {
 squares[l.squareId].letterId = null;
 l.squareId = null;
@@ -126,16 +134,18 @@ l.squareId = null;
 
 el.addEventListener("pointermove", e => {
 if (!el.hasPointerCapture(e.pointerId)) return;
-l.x = origX + (e.clientX - startX);
-l.y = origY + (e.clientY - startY);
-updateLetter(id);
+l.left = origX + (e.clientX - startX);
+l.top = origY + (e.clientY - startY);
+el.style.left = l.left + "px";
+el.style.top = l.top + "px";
 });
 
 el.addEventListener("pointerup", () => {
 cacheSquareRects();
 const snap = findSnapSquare(l);
 if (snap !== null) placeInSquare(l, snap);
-updateLetter(id);
+el.style.left = l.left + "px";
+el.style.top = l.top + "px";
 });
 
 // Tap to lock/unlock
@@ -147,12 +157,12 @@ el.classList.toggle("locked", l.locked);
 }
 });
 
-// Double-click delete
+// Double-tap delete
 el.addEventListener("dblclick", () => {
 el.style.transition = "opacity 0.2s";
 el.style.opacity = "0";
 setTimeout(() => {
-canvas.removeChild(el);
+if (el.parentElement) canvas.removeChild(el);
 if (l.squareId !== null) squares[l.squareId].letterId = null;
 delete letters[id];
 }, 200);
@@ -161,21 +171,22 @@ delete letters[id];
 
 /* ---------- SNAP LOGIC ---------- */
 function findSnapSquare(letter) {
-const cx = letter.x + 22;
-const cy = letter.y + 22;
+const cx = letter.left + 22;
+const cy = letter.top + 22;
 for (const id in squares) {
 const sq = squares[id];
 if (sq.letterId !== null) continue;
 const r = sq.rect;
-if (cx > r.left && cx < r.left + r.width && cy > r.top && cy < r.top + r.height) return id;
+if (cx > r.left && cx < r.left + r.width && cy > r.top && cy < r.top + r.height)
+return id;
 }
 return null;
 }
 
 function placeInSquare(letter, squareId) {
 const r = squares[squareId].rect;
-letter.x = r.left + r.width / 2 - 22;
-letter.y = r.top + r.height / 2 - 22;
+letter.left = r.left + r.width / 2 - 22;
+letter.top = r.top + r.height / 2 - 22;
 letter.squareId = squareId;
 squares[squareId].letterId = letter.id;
 }
@@ -198,13 +209,14 @@ letterInput.focus();
 
 letterInput.addEventListener("keydown", e => {
 if (e.key === "Enter") {
-const char = e.target.value.trim().toUpperCase();
+const char = letterInput.value.trim().toUpperCase();
 if (!char.match(/^[A-Z]$/)) return;
 addLetter(char);
-e.target.value = "";
-e.target.focus();
+letterInput.value = "";
+letterInput.focus();
 e.preventDefault();
 }
 });
 });
- 
+
+	
