@@ -58,12 +58,20 @@ function buildWords() {
 
 // ---------------------- Cache squares ----------------------
 function cacheSquareRects() {
+	const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+	
   for (const id in squares) {
     const el = document.querySelector(`[data-id="${id}"]`);
-    squares[id].rect = el.getBoundingClientRect();
+	const r = el.getBoundingClientRect();
+	
+	squares[id].rect = {
+			left: r.left - canvasRect.left,
+			top: r.top - canvasRect.top,
+			width: r.width,
+			height: r.height
+	};
   }
 }
-
 // ---------------------- Keyboard input ----------------------
 function handleKeyboardInput(e) {
   const char = e.target.value.toUpperCase();
@@ -160,7 +168,7 @@ function findSnapSquare(letter) {
       centerY < r.bottom
     ) {
       return id;
-    }
+    }c
   }
   return null;
 }
@@ -169,6 +177,8 @@ function placeInSquare(letter, squareId) {
   const sq = squares[squareId];
   const r = sq.rect;
   const canvasRect = docuument.getElementById('canvas').getBoundingClientRect();
+
+  canvas.appendChild(div);
   letter.x = r.left - canvasRect.left;
   letter.y = r.top - canvasRect.top;
   letter.squareId = squareId;
@@ -181,4 +191,5 @@ function toggleLock(letter) {
   letter.locked = !letter.locked;
   renderLetters();
 }
+
 
