@@ -1,172 +1,148 @@
-// ---------------------- Service Worker ----------------------
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js')
-    .then(() => console.log('Service Worker registered'))
-    .catch(err => console.log('Service Worker failed:', err));
-}
+const canvas = document.getElementById("canvas");
+const wordsContainer = document.getElementById("words");
 
-// ---------------------- Variables ----------------------
-let letters = [];
+let letters = {};
 let squares = {};
-let dragLetter = null;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
+let letterId = 0;
+let squareId = 0;
 
-document.getElementById("buildBtn").onclick = buildWords;
-const hidden = document.getElementById("hiddenInput");
-hidden.focus();
-hidden.addEventListener("input", handleKeyboardInput);
-document.getElementById("canvas").onclick = () => hidden.focus();
+/* ---------- WORD SETUP ---------- */
 
-// ---------------------- Build words ----------------------
-function buildWords() {
-  const input = document.getElementById("lengthInput").value;
-  const nums = input.split(/\s+/).map(n => parseInt(n)).filter(Boolean);
-
-  const wordsDiv = document.getElementById("words");
-  wordsDiv.innerHTML = "";
+function buildWords(lengths) {
+  wordsContainer.innerHTML = "";
   squares = {};
+  squareId = 0;
 
-  nums.forEach((n, wIndex) => {
-    const row = document.createElement("div");
-    row.className = "word";
+  lengths.forEach(len => {
+    const word = document.createElement("div");
+    word.className = "word";
 
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < len; i++) {
       const sq = document.createElement("div");
-      const id = `w${wIndex}s${i}`;
       sq.className = "square";
-      sq.dataset.id = id;
+      sq.dataset.id = squareId;
 
-      sq.ondragover = e => e.preventDefault();
-      sq.ondrop = () => dropOnSquare(id);
+      squares[squareId] = {
+        el: sq,
+        letterId: null,
+        rect: null
+      };
 
-      squares[id] = { letterId: null, rect: null };
-      row.appendChild(sq);
+      word.appendChild(sq);
+      squareId++;
     }
-
-    wordsDiv.appendChild(row);
-
-    if (wIndex < nums.length - 1) {
-      const spacer = document.createElement("div");
-      spacer.className = "word-space";
-      wordsDiv.appendChild(spacer);
-    }
+    wordsContainer.appendChild(word);
   });
 
   cacheSquareRects();
 }
 
-// ---------------------- Cache squares ----------------------
-function cacheSquareRects() {
-	const canvasRect = document.getElementById('canvas').getBoundingClientRect();
-	
-  for (const id in squares) {
-    const el = document.querySelector(`[data-id="${id}"]`);
-	const r = el.getBoundingClientRect();
-	
-	squares[id].rect = {
-			left: r.left - canvasRect.left,
-			top: r.top - canvasRect.top,
-			width: r.width,
-			height: r.height
-	};
-  }
-}
-// ---------------------- Keyboard input ----------------------
-function handleKeyboardInput(e) {
-  const char = e.target.value.toUpperCase();
-  e.target.value = "";
-  if (!/^[A-Z]$/.test(char)) return;
+/* ---------- LETTER CREATION ---------- */
 
-  const letter = {
-    id: crypto.randomUUID(),
+function addLetter(char) {
+  const id = letterId++;
+  const div = document.createElement("div");
+  div.className = "letter";
+  div.textContent = char;
+  div.dataset.id = id;
+
+  letters[id] = {
+    id,
     char,
-    x: 10,
-    y: 10,
+    el: div,
+    x: 20,
+    y: 200,
     squareId: null,
     locked: false
   };
 
-  letters.push(letter);
-  renderLetters();
+  canvas.appendChild(div);
+  updateLetter(id);
+  enableDrag(id);
 }
 
-// ---------------------- Render letters ----------------------
-function renderLetters() {
-  const canvas = document.getElementById("canvas");
-  canvas.querySelectorAll(".letter").forEach(l => l.remove());
+/* ---------- POSITIONING ---------- */
 
-  letters.forEach(l => {
-    const div = document.createElement("div");
-    div.className = "letter" + (l.locked ? " locked" : "");
-    div.textContent = l.char;
-    div.style.left = l.x + "px";
-    div.style.top = l.y + "px";
-    div.dataset.id = l.id;
+function updateLetter(id) {
+  const l = letters[id];
+  l.el.style.transform = `translate(${l.x}px, ${l.y}px)`;
+}
 
-    div.onpointerdown = e => startDrag(e, l);
-    div.onclick = () => toggleLock(l);
+function cacheSquareRects() {
+  const canvasRect = canvas.getBoundingClientRect();
 
-    canvas.appendChild(div);
+  for (const id in squares) {
+    const r = squares[id].el.getBoundingClientRect();
+    squares[id].rect = {
+      left: r.left - canvasRect.left,
+      top: r.top - canvasRect.top,
+      width: r.width,
+      height: r.height
+    };
+  }
+}
+
+/* ---------- DRAG & DROP ---------- */
+
+function enableDrag(id) {
+  const l = letters[id];
+  const el = l.el;
+
+  let startX, startY, origX, origY;
+
+  el.addEventListener("pointerdown", e => {
+    if (l.locked) return;
+
+    el.setPointerCapture(e.pointerId);
+    startX = e.clientX;
+    startY = e.clientY;
+    origX = l.x;
+    origY = l.y;
+
+    if (l.squareId !== null) {
+      squares[l.squareId].letterId = null;
+      l.squareId = null;
+    }
+  });
+
+  el.addEventListener("pointermove", e => {
+    if (!el.hasPointerCapture(e.pointerId)) return;
+
+    l.x = origX + (e.clientX - startX);
+    l.y = origY + (e.clientY - startY);
+    updateLetter(id);
+  });
+
+  el.addEventListener("pointerup", () => {
+    const snap = findSnapSquare(l);
+    if (snap !== null) placeInSquare(l, snap);
+    updateLetter(id);
+  });
+
+  el.addEventListener("click", () => {
+    if (l.squareId !== null) {
+      l.locked = !l.locked;
+      el.classList.toggle("locked", l.locked);
+    }
   });
 }
 
-// ---------------------- Drag logic ----------------------
-function startDrag(e, letter) {
-  if (letter.locked) return;
+/* ---------- SNAP LOGIC ---------- */
 
-  dragLetter = letter;
-  dragOffsetX = e.clientX - letter.x;
-  dragOffsetY = e.clientY - letter.y;
-
-  if (letter.squareId) {
-    squares[letter.squareId].letterId = null;
-    letter.squareId = null;
-  }
-}
-
-document.onpointermove = e => {
-  if (!dragLetter) return;
-
-  dragLetter.x = e.clientX - dragOffsetX;
-  dragLetter.y = e.clientY - dragOffsetY;
-
-  const el = document.querySelector(`[data-id="${dragLetter.id}"]`);
-  if (el) {
-    el.style.left = dragLetter.x + "px";
-    el.style.top = dragLetter.y + "px";
-  }
-};
-
-document.onpointerup = () => {
-  if (!dragLetter) return;
-
-  const snapSquare = findSnapSquare(dragLetter);
-
-  if (snapSquare) {
-    placeInSquare(dragLetter, snapSquare);
-  }
-
-  dragLetter = null;
-  renderLetters();
-};
-
-// ---------------------- Snap helpers ----------------------
 function findSnapSquare(letter) {
-  const canvasRect = document.getElementById('canvas').getBoundingClientRect();
-  const centerX = letter.x + 22; // letter width / 2
-  const centerY = letter.y + 22;
+  const cx = letter.x + 22;
+  const cy = letter.y + 22;
 
   for (const id in squares) {
     const sq = squares[id];
-    if (sq.letterId) continue;
+    if (sq.letterId !== null) continue;
 
     const r = sq.rect;
     if (
-      centerX > r.left &&
-      centerX < r.left + r.width &&
-      centerY > r.top &&
-      centerY < r.top + r.height
+      cx > r.left &&
+      cx < r.left + r.width &&
+      cy > r.top &&
+      cy < r.top + r.height
     ) {
       return id;
     }
@@ -174,25 +150,25 @@ function findSnapSquare(letter) {
   return null;
 }
 
-
 function placeInSquare(letter, squareId) {
   const sq = squares[squareId];
   const r = sq.rect;
 
-	
-  letter.x = r.left;
-  letter.y = r.top ;
+  letter.x = r.left + r.width / 2 - 22;
+  letter.y = r.top + r.height / 2 - 22;
+
   letter.squareId = squareId;
   sq.letterId = letter.id;
 }
 
-// ---------------------- Lock / unlock ----------------------
-function toggleLock(letter) {
-  if (!letter.squareId) return;
-  letter.locked = !letter.locked;
-  renderLetters();
-}
+/* ---------- DEMO SETUP ---------- */
 
+/* Example: 2 words, lengths 5 and 4 */
+buildWords([5, 4]);
 
-
-
+/* Keyboard input */
+document.addEventListener("keydown", e => {
+  if (/^[a-zA-Z]$/.test(e.key)) {
+    addLetter(e.key.toUpperCase());
+  }
+});
