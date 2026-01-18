@@ -153,7 +153,8 @@ document.onpointerup = () => {
 
 // ---------------------- Snap helpers ----------------------
 function findSnapSquare(letter) {
-  const centerX = letter.x + 22;
+  const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+  const centerX = letter.x + 22; // letter width / 2
   const centerY = letter.y + 22;
 
   for (const id in squares) {
@@ -163,15 +164,16 @@ function findSnapSquare(letter) {
     const r = sq.rect;
     if (
       centerX > r.left &&
-      centerX < r.right &&
+      centerX < r.left + r.width &&
       centerY > r.top &&
-      centerY < r.bottom
+      centerY < r.top + r.height
     ) {
       return id;
-    }c
+    }
   }
   return null;
 }
+
 
 function placeInSquare(letter, squareId) {
   const sq = squares[squareId];
@@ -190,6 +192,7 @@ function toggleLock(letter) {
   letter.locked = !letter.locked;
   renderLetters();
 }
+
 
 
 
