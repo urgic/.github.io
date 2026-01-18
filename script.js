@@ -1,17 +1,4 @@
 
-Conversation opened. 1 unread message.
-
-Skip to content
-Using Gmail with screen readers
-1 of 1
-New script
-Inbox
-Trevor Lukey <tlukey@gmail.com>
-	
-6:26 PM (8 minutes ago)
-	
-	
-to me
 window.addEventListener("DOMContentLoaded", () => {
 const canvas = document.getElementById("canvas");
 const wordsContainer = document.getElementById("words");
@@ -252,3 +239,4 @@ letterInput.focus();
 
 Trevor
 	
+
