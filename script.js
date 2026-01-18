@@ -56,8 +56,6 @@ requestAnimationFrame(() =>{
 letterInput.focus();
 }
 
-/* end BuildWords */
-	
 /* ---------- ADD LETTER ---------- */
 function addLetter(char) {
 const id = letterId++;
@@ -129,18 +127,18 @@ squares[squareId].letterId = letter.id;
 }
 
 /* ---------- DRAG / TAP / DELETE ---------- */
+f
 function enableDrag(id) {
 const l = letters[id];
 const el = l.el;
-let startX, startY;
+
 let dragging = false;
 let longPressTimer;
 
+/* ---------- POINTER DOWN ---------- */
 el.addEventListener("pointerdown", e => {
-if (l.locked) return;
+if (l.locked) return; // locked letters cannot move
 
-startX = e.clientX;
-startY = e.clientY;
 dragging = false;
 
 // Long press delete
@@ -150,30 +148,34 @@ if (l.squareId !== null) squares[l.squareId].letterId = null;
 delete letters[id];
 }, 500);
 
-// Detach & unlock if picked up from square
-if (l.squareId !== null) {
-l.locked = false;
-el.classList.remove("locked");
-squares[l.squareId].letterId = null;
-l.squareId = null;
-}
-
 el.setPointerCapture(e.pointerId);
 });
 
+/* ---------- POINTER MOVE ---------- */
 el.addEventListener("pointermove", e => {
 if (!el.hasPointerCapture(e.pointerId)) return;
 
+// First movement = real drag
+if (!dragging) {
 dragging = true;
 clearTimeout(longPressTimer);
 
+// Detach from square ONLY when drag starts
+if (l.squareId !== null) {
+squares[l.squareId].letterId = null;
+l.squareId = null;
+l.locked = false;
+el.classList.remove("locked");
+}
+}
+
 l.left += e.movementX;
 l.top += e.movementY;
-
 el.style.left = l.left + "px";
 el.style.top = l.top + "px";
 });
 
+/* ---------- POINTER UP ---------- */
 el.addEventListener("pointerup", e => {
 clearTimeout(longPressTimer);
 
@@ -184,13 +186,19 @@ if (snap !== null) placeInSquare(l, snap);
 }
 });
 
-// Tap to lock (ONLY when in square)
+/* ---------- TAP TO LOCK ---------- */
 el.addEventListener("click", e => {
 if (l.squareId === null) return;
+
 l.locked = !l.locked;
 el.classList.toggle("locked", l.locked);
 });
 }
+ 
+
+	
+
+/* end enableDrag*/
 
 /* ---------- UI EVENTS ---------- */
 buildBtn.addEventListener("click", () => {
@@ -234,4 +242,3 @@ letterInput.focus();
 });
 
 	
-
