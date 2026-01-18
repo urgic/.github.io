@@ -178,3 +178,16 @@ addLetter(char);
 input.value = "";
 input.focus();
 });
+
+document.getElementById("letterInput").addEventListener("keydown", e => {
+if (e.key === "Enter") {
+const input = e.target;
+const char = input.value.trim().toUpperCase();
+if (!char.match(/^[A-Z]$/)) return;
+addLetter(char);
+input.value = "";
+input.focus();
+e.preventDefault();
+}
+});
+
