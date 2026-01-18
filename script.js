@@ -1,4 +1,17 @@
 
+Conversation opened. 1 unread message.
+
+Skip to content
+Using Gmail with screen readers
+1 of 3
+Script
+Inbox
+Trevor Lukey <tlukey@gmail.com>
+	
+5:12 PM (0 minutes ago)
+	
+	
+to me
 window.addEventListener("DOMContentLoaded", () => {
 const canvas = document.getElementById("canvas");
 const wordsContainer = document.getElementById("words");
@@ -13,14 +26,13 @@ let squares = {};
 let letterId = 0;
 let squareId = 0;
 
-/* ---------- BUILD BOXES ---------- */
+/* ---------- BUILD WORD BOXES ---------- */
 function buildWords(lengths) {
-// Clear previous squares
 wordsContainer.innerHTML = "";
 squares = {};
 squareId = 0;
 
-// Clear previous letters
+// Clear letters
 for (const id in letters) {
 const l = letters[id];
 if (l.el.parentElement) canvas.removeChild(l.el);
@@ -57,29 +69,26 @@ letterInput.focus();
 /* ---------- ADD LETTER ---------- */
 function addLetter(char) {
 const id = letterId++;
-const div = document.createElement("div");
-div.className = "letter";
-div.textContent = char;
-div.dataset.id = id;
+const el = document.createElement("div");
+el.className = "letter";
+el.textContent = char;
+el.dataset.id = id;
 
-// Offset letters to avoid stacking
 const offset = (id % 10) * 20;
-const baseX = 20 + offset;
-const baseY = 150 + offset;
 
 letters[id] = {
 id,
-el: div,
-left: baseX,
-top: baseY,
+el,
+left: 20 + offset,
+top: 150 + offset,
 squareId: null,
 locked: false
 };
 
-div.style.left = letters[id].left + "px";
-div.style.top = letters[id].top + "px";
+el.style.left = letters[id].left + "px";
+el.style.top = letters[id].top + "px";
 
-canvas.appendChild(div);
+canvas.appendChild(el);
 enableDrag(id);
 }
 
@@ -97,85 +106,24 @@ height: r.height
 }
 }
 
-/* ---------- DRAG, TAP, DOUBLE-TAP ---------- */
-
-function enableDrag(id) {
-const l = letters[id];
-const el = l.el;
-let startX, startY, origX, origY;
-let moved = false;
-let longPressTimer;
-let wasInSquare = false;
-
-el.addEventListener("pointerdown", e => {
-if (l.locked) return; // prevent drag if locked
-el.setPointerCapture(e.pointerId);
-startX = e.clientX;
-startY = e.clientY;
-origX = l.left;
-origY = l.top;
-moved = false;
-wasInSquare = l.squareId !== null;
-
-// Long press to delete (mobile)
-longPressTimer = setTimeout(() => {
-if (el.parentElement) canvas.removeChild(el);
-if (l.squareId !== null) squares[l.squareId].letterId = null;
-delete letters[id];
-}, 500);
-});
-
-el.addEventListener("pointermove", e => {
-if (!el.hasPointerCapture(e.pointerId)) return;
-moved = true;
-clearTimeout(longPressTimer);
-
-// Only clear square if drag happens
-if (l.squareId !== null) {
-squares[l.squareId].letterId = null;
-l.squareId = null;
-}
-
-l.left = origX + (e.clientX - startX);
-l.top = origY + (e.clientY - startY);
-el.style.left = l.left + "px";
-el.style.top = l.top + "px";
-});
-
-el.addEventListener("pointerup", e => {
-clearTimeout(longPressTimer);
-
-if (moved) {
-// Snap if dragged
-cacheSquareRects();
-const snap = findSnapSquare(l);
-if (snap !== null) placeInSquare(l, snap);
-} else {
-// Tap detected: toggle lock if letter was originally in a square
-if (wasInSquare) {
-l.locked = !l.locked;
-el.classList.toggle("locked", l.locked);
-}
-}
-
-el.style.left = l.left + "px";
-el.style.top = l.top + "px";
-});
-}
-
-/* enad enabledrag*/
-	
-
-/* ---------- SNAP LOGIC ---------- */
+/* ---------- SNAP ---------- */
 function findSnapSquare(letter) {
 const cx = letter.left + 22;
 const cy = letter.top + 22;
+
 for (const id in squares) {
 const sq = squares[id];
 if (sq.letterId !== null) continue;
+
 const r = sq.rect;
-if (cx > r.left && cx < r.left + r.width && cy > r.top && cy < r.top + r.height)
+if (
+cx > r.left &&
+cx < r.left + r.width &&
+cy > r.top &&
+cy < r.top + r.height
+) {
 return id;
+}
 }
 return null;
 }
@@ -188,11 +136,78 @@ letter.squareId = squareId;
 squares[squareId].letterId = letter.id;
 }
 
-/* ---------- USER INPUT ---------- */
+/* ---------- DRAG / TAP / DELETE ---------- */
+function enableDrag(id) {
+const l = letters[id];
+const el = l.el;
+let startX, startY;
+let dragging = false;
+let longPressTimer;
+
+el.addEventListener("pointerdown", e => {
+if (l.locked) return;
+
+startX = e.clientX;
+startY = e.clientY;
+dragging = false;
+
+// Long press delete
+longPressTimer = setTimeout(() => {
+if (el.parentElement) canvas.removeChild(el);
+if (l.squareId !== null) squares[l.squareId].letterId = null;
+delete letters[id];
+}, 500);
+
+// Detach & unlock if picked up from square
+if (l.squareId !== null) {
+l.locked = false;
+el.classList.remove("locked");
+squares[l.squareId].letterId = null;
+l.squareId = null;
+}
+
+el.setPointerCapture(e.pointerId);
+});
+
+el.addEventListener("pointermove", e => {
+if (!el.hasPointerCapture(e.pointerId)) return;
+
+dragging = true;
+clearTimeout(longPressTimer);
+
+l.left += e.movementX;
+l.top += e.movementY;
+
+el.style.left = l.left + "px";
+el.style.top = l.top + "px";
+});
+
+el.addEventListener("pointerup", e => {
+clearTimeout(longPressTimer);
+
+if (dragging) {
+cacheSquareRects();
+const snap = findSnapSquare(l);
+if (snap !== null) placeInSquare(l, snap);
+}
+});
+
+// Tap to lock (ONLY when in square)
+el.addEventListener("click", e => {
+if (l.squareId === null) return;
+l.locked = !l.locked;
+el.classList.toggle("locked", l.locked);
+});
+}
+
+/* ---------- UI EVENTS ---------- */
 buildBtn.addEventListener("click", () => {
 const input = wordInput.value.trim();
 if (!input) return;
-const lengths = input.split(/\s+/).map(n => parseInt(n, 10)).filter(n => n > 0 && n < 20);
+const lengths = input
+.split(/\s+/)
+.map(n => parseInt(n, 10))
+.filter(n => n > 0 && n < 20);
 if (lengths.length) buildWords(lengths);
 });
 
@@ -215,7 +230,6 @@ e.preventDefault();
 }
 });
 
-// Reset letters button
 resetLettersBtn.addEventListener("click", () => {
 for (const id in letters) {
 const l = letters[id];
@@ -226,6 +240,7 @@ letterId = 0;
 letterInput.focus();
 });
 });
+ 
 
+Trevor
 	
-
