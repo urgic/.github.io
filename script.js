@@ -1,17 +1,4 @@
 
-Conversation opened. 1 unread message.
-
-Skip to content
-Using Gmail with screen readers
-1 of 3
-Script
-Inbox
-Trevor Lukey <tlukey@gmail.com>
-	
-5:12 PM (0 minutes ago)
-	
-	
-to me
 window.addEventListener("DOMContentLoaded", () => {
 const canvas = document.getElementById("canvas");
 const wordsContainer = document.getElementById("words");
@@ -62,10 +49,15 @@ squareId++;
 wordsContainer.appendChild(word);
 });
 
-cacheSquareRects();
+requestAnimationFrame(() =>{
+	cacheSquareRects();
+});
+
 letterInput.focus();
 }
 
+/* end BuildWords */
+	
 /* ---------- ADD LETTER ---------- */
 function addLetter(char) {
 const id = letterId++;
@@ -240,7 +232,6 @@ letterId = 0;
 letterInput.focus();
 });
 });
- 
 
-Trevor
 	
+
