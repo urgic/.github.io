@@ -235,8 +235,4 @@ letterId = 0;
 letterInput.focus();
 });
 });
- 
-
-Trevor
-	
 
