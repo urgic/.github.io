@@ -185,7 +185,24 @@ const lengths = input
 if (!lengths.length) return;
 
 buildWords(lengths);
+}
+
+document.getElementById("buildBtn").addEventListener("click", () => {
+    const input = document.getElementById("wordInput").value.trim();
+    if (!input) return;
+
+    const lengths = input
+    .split(/\s+/)
+   .map(n => parseInt(n, 10))
+  .filter(n => n > 0 && n < 20);
+
+if (!lengths.length) return;
+
+buildWords(lengths);
 });
+                                                    
+                                                    );
+
 
 
 
