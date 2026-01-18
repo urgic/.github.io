@@ -8,26 +8,11 @@ const letterInput = document.getElementById("letterInput");
 const addLetterBtn = document.getElementById("addLetterBtn");
 const resetLettersBtn = document.getElementById("resetLettersBtn");
 
-resetLettersBtn.addEventListener("click", () => {
-// Remove all letters from canvas
-for (const id in letters) {
-const l = letters[id];
-if (l.el.parentElement) canvas.removeChild(l.el);
-}
+let letters = {};
+let squares = {};
+let letterId = 0;
+let squareId = 0;
 
-// Clear letters object
-   letters = {};
-   letterId = 0;
-
-
-   let letters = {};
-   let squares = {};
-   let letterId = 0;
-   let squareId = 0;
-// Refocus input
-   letterInput.focus();
-}];
-   
 /* ---------- BUILD BOXES ---------- */
 function buildWords(lengths) {
 // Clear previous squares
@@ -77,7 +62,7 @@ div.className = "letter";
 div.textContent = char;
 div.dataset.id = id;
 
-// Offset letters so they don't stack
+// Offset letters to avoid stacking
 const offset = (id % 10) * 20;
 const baseX = 20 + offset;
 const baseY = 150 + offset;
@@ -91,7 +76,6 @@ squareId: null,
 locked: false
 };
 
-// Position letters using left/top
 div.style.left = letters[id].left + "px";
 div.style.top = letters[id].top + "px";
 
@@ -216,6 +200,17 @@ letterInput.value = "";
 letterInput.focus();
 e.preventDefault();
 }
+});
+
+// Reset letters button
+resetLettersBtn.addEventListener("click", () => {
+for (const id in letters) {
+const l = letters[id];
+if (l.el.parentElement) canvas.removeChild(l.el);
+}
+letters = {};
+letterId = 0;
+letterInput.focus();
 });
 });
 
