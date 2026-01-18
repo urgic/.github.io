@@ -168,9 +168,9 @@ function findSnapSquare(letter) {
 function placeInSquare(letter, squareId) {
   const sq = squares[squareId];
   const r = sq.rect;
-
-  letter.x = r.left;
-  letter.y = r.top;
+  const canvasRect = docuument.getElementById('canvas').getBoundingClientRect();
+  letter.x = r.left - canvasRect.left;
+  letter.y = r.top - canvasRect.top;
   letter.squareId = squareId;
   sq.letterId = letter.id;
 }
@@ -181,3 +181,4 @@ function toggleLock(letter) {
   letter.locked = !letter.locked;
   renderLetters();
 }
+
