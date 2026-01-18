@@ -128,16 +128,15 @@ squares[squareId].letterId = letter.id;
 }
 
 /* ---------- DRAG / TAP / DELETE ---------- */
+
 function enableDrag(id) {
 const l = letters[id];
 const el = l.el;
-
 let dragging = false;
 let longPressTimer;
 
-/* ---------- POINTER DOWN ---------- */
 el.addEventListener("pointerdown", e => {
-if (l.locked) return; // locked letters cannot move
+if (l.locked) return; // cannot drag locked letters
 
 dragging = false;
 
@@ -151,16 +150,15 @@ delete letters[id];
 el.setPointerCapture(e.pointerId);
 });
 
-/* ---------- POINTER MOVE ---------- */
 el.addEventListener("pointermove", e => {
 if (!el.hasPointerCapture(e.pointerId)) return;
 
-// First movement = real drag
+// Start dragging
 if (!dragging) {
 dragging = true;
 clearTimeout(longPressTimer);
 
-// Detach from square ONLY when drag starts
+// Detach from square ONLY if moving (letter unlocks)
 if (l.squareId !== null) {
 squares[l.squareId].letterId = null;
 l.squareId = null;
@@ -175,7 +173,6 @@ el.style.left = l.left + "px";
 el.style.top = l.top + "px";
 });
 
-/* ---------- POINTER UP ---------- */
 el.addEventListener("pointerup", e => {
 clearTimeout(longPressTimer);
 
@@ -186,15 +183,18 @@ if (snap !== null) placeInSquare(l, snap);
 }
 });
 
-/* ---------- TAP TO LOCK ---------- */
+// Tap to lock (ONLY in squares)
 el.addEventListener("click", e => {
-if (l.squareId === null) return;
+if (l.squareId === null) return; // only letters in squares can lock
 
-l.locked = !l.locked;
-el.classList.toggle("locked", l.locked);
+l.locked = !l.locked; // toggle logical state
+el.classList.toggle("locked", l.locked); // toggle visual indicator
 });
 }
 
+	
+
+/* End EnableDrage */
 /* ---------- UI EVENTS ---------- */
 buildBtn.addEventListener("click", () => {
 const input = wordInput.value.trim();
