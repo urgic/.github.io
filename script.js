@@ -68,19 +68,20 @@ function updateLetter(id) {
   l.el.style.transform = `translate(${l.x}px, ${l.y}px)`;
 }
 
-function cacheSquareRects() {
-  const canvasRect = canvas.getBoundingClientRect();
+unction cacheSquareRects() {
+const canvasRect = canvas.getBoundingClientRect();
 
-  for (const id in squares) {
-    const r = squares[id].el.getBoundingClientRect();
+for (const id in squares) {
+const r = squares[id].el.getBoundingClientRect();
 
-    squares[id].rect = {
-      left: r.left - canvasRect.left + canvas.scrollLeft,
-      top:  r.top  - canvasRect.top  + canvas.scrollTop,
-      width: r.width,
-      height: r.height
-    };
-  }
+// NO scroll adjustments needed
+squares[id].rect = {
+left: r.left - canvasRect.left,
+top: r.top - canvasRect.top,
+width: r.width,
+height: r.height
+};
+}
 }
 
 /* ---------- DRAG & DROP ---------- */
@@ -152,13 +153,14 @@ function findSnapSquare(letter) {
 }
 
 function placeInSquare(letter, squareId) {
-  const r = squares[squareId].rect;
+const r = squares[squareId].rect;
 
-  letter.x = r.left + r.width / 2 - 22;
-  letter.y = r.top  + r.height / 2 - 22;
+// snap to center
+letter.x = r.left + r.width / 2 - 22;
+letter.y = r.top + r.height / 2 - 22;
 
-  letter.squareId = squareId;
-  squares[squareId].letterId = letter.id;
+letter.squareId = squareId;
+squares[squareId].letterId = letter.id;
 }
 /* ---------- DEMO SETUP ---------- */
 
@@ -184,6 +186,7 @@ if (!lengths.length) return;
 
 buildWords(lengths);
 });
+
 
 
 
