@@ -1,87 +1,114 @@
 
-* { box-sizing: border-box; }
-
 body {
-margin: 0;
 font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-background: #f0f0f0;
+margin: 12px;
 }
 
-/* Controls */
-#controls, #letterControls {
-padding: 10px;
-background: #fff;
-border-bottom: 1px solid #ccc;
+/* ---------- CONTROLS ---------- */
+
+.controls {
 display: flex;
-gap: 8px;
+gap: 10px;
+margin-bottom: 10px;
+flex-wrap: wrap;
 }
 
-#controls input, #letterControls input {
-flex: 1;
-font-size: 16px;
-padding: 6px;
-}
-
-#controls button, #letterControls button {
-font-size: 16px;
-padding: 6px 12px;
-}
-
-/* Canvas */
-#canvas {
-position: relative;
+input {
 padding: 10px;
-background: #ddd;
-min-height: 300px;
+font-size: 16px;
+font-weight: bold;
+border-radius: 8px;
+border: 1px solid #ccc;
 }
 
-/* Words */
+/* ---------- BUTTONS ---------- */
+
+button {
+min-height: 48px;
+min-width: 48px;
+padding: 12px 18px;
+font-size: 16px;
+font-weight: 600;
+border-radius: 10px;
+border: none;
+color: #fff;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+-webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+transform: scale(0.97);
+opacity: 0.9;
+}
+
+/* Button colors */
+.btn-build { background-color: #3498db; } /* blue */
+.btn-add { background-color: #2ecc71; } /* green */
+.btn-reset { background-color: #e74c3c; } /* red */
+
+/* ---------- WORD BOXES ---------- */
+
+#words {
+margin-bottom: 12px;
+}
+
 .word {
 display: flex;
 gap: 6px;
-margin-bottom: 10px;
+margin-bottom: 6px;
 }
 
-/* Squares */
 .square {
 width: 44px;
 height: 44px;
-border: 2px solid #666;
-background: #fff;
-border-radius: 4px;
+border: 2px solid #333;
+border-radius: 6px;
 }
 
-/* Letters */
+/* ---------- CANVAS ---------- */
+
+#canvas {
+position: relative;
+height: 350px;
+border: 2px dashed #aaa;
+border-radius: 8px;
+overflow: hidden;
+}
+
+/* ---------- LETTERS ---------- */
+
 .letter {
 position: absolute;
 width: 44px;
 height: 44px;
-background: #fff;
-border: 2px solid #333;
 border-radius: 6px;
-font-size: 22px;
-font-weight: bold;
 display: flex;
 align-items: center;
 justify-content: center;
-cursor: grab;
+font-weight: bold;
+font-size: 20px;
 user-select: none;
 touch-action: none;
-z-index: 10;
+background-color: #ddd;
+color: #000;
 }
 
+/* Vowels */
+.letter.vowel {
+background-color: #2ecc71;
+color: #000;
+}
+
+/* Consonants */
+.letter.consonant {
+background-color: #3498db;
+color: #fff;
+}
+
+/* Lock indicator (visual only, accepted limitation) */
 .letter.locked {
-background: #cde5ff;
-border-color: #2a6dd8;
-cursor: default;
+outline: 3px solid gold;
 }
 
-/* Hint */
-.hint {
-display: block;
-margin-top: 12px;
-color: #444;
-font-size: 14px;
-}
-
-	
