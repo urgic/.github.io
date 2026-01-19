@@ -2,33 +2,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anagram Helper</title>
-<link rel="stylesheet" href="style.css" />
+
+<!-- Prevent aggressive caching during development -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Build word boxes -->
-<div id="controls">
-<input id="wordInput" placeholder="Word lengths (e.g. 5 4 6)" />
-<button id="buildBtn">Build</button>
+<div class="controls">
+<input
+id="wordInput"
+type="text"
+placeholder="Enter word lengths (e.g. 5 4)"
+>
+
+<button id="buildBtn" class="btn-build">🧱 Build</button>
 </div>
 
-<!-- Letter input and controls -->
-<div id="letterControls">
-<input id="letterInput" placeholder="Type a letter" maxlength="1" />
-<button id="addLetterBtn">Add Letter</button>
-<button id="resetLettersBtn">Reset Letters</button>
+<div class="controls">
+<input
+id="letterInput"
+type="text"
+placeholder="Enter letters (e.g. TRAIN)"
+>
+
+<button id="addLetterBtn" class="btn-add">➕ Add</button>
+<button id="resetLettersBtn" class="btn-reset">🗑 Clear</button>
 </div>
 
-<!-- Canvas and word boxes -->
-<div id="canvas">
 <div id="words"></div>
-<span class="hint">Drag letters into boxes. Tap to lock/unlock. Double-tap to delete.</span>
-</div>
 
-<script src="script.js"></script>
+<div id="canvas"></div>
+
+<script src="script.js?v=1"></script>
 </body>
 </html>
 
+	
