@@ -19,10 +19,10 @@ wordsContainer.innerHTML = "";
 squares = {};
 squareId = 0;
 
-// Clear letters
 for (const id in letters) {
-const l = letters[id];
-if (l.el.parentElement) canvas.removeChild(l.el);
+if (letters[id].el.parentElement) {
+canvas.removeChild(letters[id].el);
+}
 }
 letters = {};
 letterId = 0;
@@ -49,15 +49,11 @@ squareId++;
 wordsContainer.appendChild(word);
 });
 
-// Allow layout to settle before measuring
-requestAnimationFrame(() => {
-cacheSquareRects();
-});
-
+requestAnimationFrame(cacheSquareRects);
 letterInput.focus();
 }
 
-/* ---------- ADD LETTER ---------- */
+/* ---------- ADD LETTER(S) ---------- */
 function addLetter(char) {
 const id = letterId++;
 const el = document.createElement("div");
@@ -65,13 +61,19 @@ el.className = "letter";
 el.textContent = char;
 el.dataset.id = id;
 
+if ("AEIOU".includes(char)) {
+el.classList.add("vowel");
+} else {
+el.classList.add("consonant");
+}
+
 const offset = (id % 10) * 20;
 
 letters[id] = {
 id,
 el,
 left: 20 + offset,
-top: 150 + offset,
+top: 120 + offset,
 squareId: null,
 locked: false
 };
@@ -83,21 +85,20 @@ canvas.appendChild(el);
 enableDrag(id);
 }
 
-/* ---------- CACHE SQUARE POSITIONS ---------- */
+/* ---------- SQUARE CACHE ---------- */
 function cacheSquareRects() {
-const canvasRect = canvas.getBoundingClientRect();
+const c = canvas.getBoundingClientRect();
 for (const id in squares) {
 const r = squares[id].el.getBoundingClientRect();
 squares[id].rect = {
-left: r.left - canvasRect.left,
-top: r.top - canvasRect.top,
+left: r.left - c.left,
+top: r.top - c.top,
 width: r.width,
 height: r.height
 };
 }
 }
 
-/* ---------- SNAP ---------- */
 function findSnapSquare(letter) {
 const cx = letter.left + 22;
 const cy = letter.top + 22;
@@ -112,23 +113,20 @@ cx > r.left &&
 cx < r.left + r.width &&
 cy > r.top &&
 cy < r.top + r.height
-) {
-return id;
-}
+) return id;
 }
 return null;
 }
 
-function placeInSquare(letter, squareId) {
-const r = squares[squareId].rect;
+function placeInSquare(letter, sid) {
+const r = squares[sid].rect;
 letter.left = r.left + r.width / 2 - 22;
 letter.top = r.top + r.height / 2 - 22;
-letter.squareId = squareId;
-squares[squareId].letterId = letter.id;
+letter.squareId = sid;
+squares[sid].letterId = letter.id;
 }
 
 /* ---------- DRAG / TAP / DELETE ---------- */
-
 function enableDrag(id) {
 const l = letters[id];
 const el = l.el;
@@ -136,11 +134,9 @@ let dragging = false;
 let longPressTimer;
 
 el.addEventListener("pointerdown", e => {
-if (l.locked) return; // cannot drag locked letters
-
+if (l.locked) return;
 dragging = false;
 
-// Long press delete
 longPressTimer = setTimeout(() => {
 if (el.parentElement) canvas.removeChild(el);
 if (l.squareId !== null) squares[l.squareId].letterId = null;
@@ -153,12 +149,10 @@ el.setPointerCapture(e.pointerId);
 el.addEventListener("pointermove", e => {
 if (!el.hasPointerCapture(e.pointerId)) return;
 
-// Start dragging
 if (!dragging) {
 dragging = true;
 clearTimeout(longPressTimer);
 
-// Detach from square ONLY if moving (letter unlocks)
 if (l.squareId !== null) {
 squares[l.squareId].letterId = null;
 l.squareId = null;
@@ -173,9 +167,8 @@ el.style.left = l.left + "px";
 el.style.top = l.top + "px";
 });
 
-el.addEventListener("pointerup", e => {
+el.addEventListener("pointerup", () => {
 clearTimeout(longPressTimer);
-
 if (dragging) {
 cacheSquareRects();
 const snap = findSnapSquare(l);
@@ -183,42 +176,38 @@ if (snap !== null) placeInSquare(l, snap);
 }
 });
 
-// Tap to lock (ONLY in squares)
-el.addEventListener("click", e => {
-if (l.squareId === null) return; // only letters in squares can lock
-
-l.locked = !l.locked; // toggle logical state
-el.classList.toggle("locked", l.locked); // toggle visual indicator
+// Visual lock indicator only (accepted limitation)
+el.addEventListener("click", () => {
+if (l.squareId === null) return;
+l.locked = !l.locked;
+el.classList.toggle("locked", l.locked);
 });
 }
 
-	
-
-/* End EnableDrage */
-/* ---------- UI EVENTS ---------- */
+/* ---------- UI ---------- */
 buildBtn.addEventListener("click", () => {
-const input = wordInput.value.trim();
-if (!input) return;
-const lengths = input
+const lengths = wordInput.value
+.trim()
 .split(/\s+/)
 .map(n => parseInt(n, 10))
-.filter(n => n > 0 && n < 20);
+.filter(n => n > 0);
+
 if (lengths.length) buildWords(lengths);
 });
 
 addLetterBtn.addEventListener("click", () => {
-const char = letterInput.value.trim().toUpperCase();
-if (!char.match(/^[A-Z]$/)) return;
-addLetter(char);
+const text = letterInput.value.toUpperCase().replace(/[^A-Z]/g, "");
+if (!text) return;
+for (const ch of text) addLetter(ch);
 letterInput.value = "";
 letterInput.focus();
 });
 
 letterInput.addEventListener("keydown", e => {
 if (e.key === "Enter") {
-const char = letterInput.value.trim().toUpperCase();
-if (!char.match(/^[A-Z]$/)) return;
-addLetter(char);
+const text = letterInput.value.toUpperCase().replace(/[^A-Z]/g, "");
+if (!text) return;
+for (const ch of text) addLetter(ch);
 letterInput.value = "";
 letterInput.focus();
 e.preventDefault();
@@ -227,12 +216,13 @@ e.preventDefault();
 
 resetLettersBtn.addEventListener("click", () => {
 for (const id in letters) {
-const l = letters[id];
-if (l.el.parentElement) canvas.removeChild(l.el);
+if (letters[id].el.parentElement) {
+canvas.removeChild(letters[id].el);
+}
 }
 letters = {};
 letterId = 0;
-letterInput.focus();
 });
 });
 
+	
