@@ -6,41 +6,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anagram Helper</title>
 
-<!-- Prevent aggressive caching during development -->
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-
-<link rel="stylesheet" href="style.css">
+<!-- Link to CSS in root -->
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
+<h1>Anagram Helper</h1>
 
+<!-- Controls -->
 <div class="controls">
-<input
-id="wordInput"
-type="text"
-placeholder="Enter word lengths (e.g. 5 4)"
->
+<!-- Number of letters for build -->
+<input type="number" id="numLetters" min="1" placeholder="Number of letters">
 
-<button id="buildBtn" class="btn-build">🧱 Build</button>
+<!-- Letter input for add -->
+<input type="text" id="letterInput" placeholder="Enter letters">
+
+<!-- Buttons -->
+<button class="btn-build" id="buildBtn">Build</button>
+<button class="btn-add" id="addBtn">Add</button>
+<button class="btn-reset" id="resetBtn">Reset</button>
 </div>
 
-<div class="controls">
-<input
-id="letterInput"
-type="text"
-placeholder="Enter letters (e.g. TRAIN)"
->
-
-<button id="addLetterBtn" class="btn-add">➕ Add</button>
-<button id="resetLettersBtn" class="btn-reset">🗑 Clear</button>
-</div>
-
-<div id="words"></div>
-
+<!-- Canvas -->
 <div id="canvas"></div>
 
-<script src="script.js?v=1"></script>
+<!-- Link to JS in root -->
+<script src="./script.js"></script>
 </body>
 </html>
 
